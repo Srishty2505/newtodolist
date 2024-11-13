@@ -21,6 +21,15 @@ import React, { useReducer } from 'react'
             inputValue: "",
           };
     
+          case "toggleTaskCompletion":
+      return {
+        ...state,
+        tasks: state.tasks.map((task) =>
+          task.id === action.payload
+            ? { ...task, completed: !task.completed }
+            : task
+        ),
+      };
         case "editTask":
           return {
             ...state,
@@ -49,6 +58,18 @@ function Newtodolist() {
 
           dispatch({ type: "deleteTask", payload: task.id });
         };
+
+        const handleToggleCompletion = (taskId) => {
+          dispatch({ type: "toggleTaskCompletion", payload: taskId });
+        };
+        const handlesave = () => {
+          if (state.inputValue.trim() !== "") {
+            const taskToEdit = state.tasks.find((task) => task.text === state.inputValue);
+            if (taskToEdit) {
+              dispatch({ type: "editTask", payload: { id: taskToEdit.id, text: state.inputValue } });
+            }
+          }
+        };
       
       
         return (
@@ -60,18 +81,31 @@ function Newtodolist() {
       />
       <button onClick={() => dispatch({ type: "addTask" })}disabled={state.inputValue.trim() === ""}
       >Add Task</button>
+      <button onClick={handlesave} disabled={state.inputValue.trim() === ""}>
+        Save Edit
+      </button>
 
 <ul>
         {state.tasks.map((task) => (
-          <li key={task.id}>
-            {task.text}
-            <button onClick={() => handleedit(task)}>Edit</button>
-            <button onClick={() => dispatch({ type: "deleteTask", payload: task.id })}>Delete</button>
-          </li>
-        ))}
-      </ul>
-    </>
-  );
-}
+               <li
+               key={task.id}
+               style={{ textDecoration: task.completed ? "line-through" : "none" }}
+             >
+               <input
+                 type="checkbox"
+                 checked={task.completed}
+                 onChange={() => handleToggleCompletion(task.id)}
+               />
+               {task.text}
+               <button onClick={() => handleedit(task)}>Edit</button>
+               <button onClick={() => dispatch({ type: "deleteTask", payload: task.id })}>
+                 Delete
+               </button>
+             </li>
+           ))}
+         </ul>
+       </>
+     );
+   }
 
 export default Newtodolist
